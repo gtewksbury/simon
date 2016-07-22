@@ -6,8 +6,10 @@
 *.exe
 *.o
 *.so
+
 Tewks.Simon.sdf
 
+.vs/
 Release/
 obj/
 ipch/
