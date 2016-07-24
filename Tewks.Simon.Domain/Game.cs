@@ -21,6 +21,11 @@ namespace Tewks.Simon.Domain
         public GameStats Stats { get; set; } = new GameStats();
 
         /// <summary>
+        /// Gets or sets the date the game started.
+        /// </summary>
+        public DateTime StartTime { get; set; } = DateTime.Now;
+
+        /// <summary>
         /// Gets or sets a collection of ordered colors
         /// associated with the current round
         /// </summary>
@@ -83,6 +88,7 @@ namespace Tewks.Simon.Domain
             AddButtonColor();
             Attempts = 0;
             RoundNumber++;
+            Manager.Stats.HighestRound = Math.Max(Manager.Stats.HighestRound, RoundNumber);
             manager.Device.RoundStarted(Colors.ToArray());
             manager.Ready = true;
         }
@@ -101,6 +107,21 @@ namespace Tewks.Simon.Domain
                 // end the game 
                 GameOver = true;
                 Manager.Ready = false;
+
+                var gameDuration = DateTime.Now.Subtract(StartTime);
+
+                var totalDuration = new TimeSpan(
+                        0,
+                        Manager.Stats.HoursPlayed,
+                        Manager.Stats.MinutesPlayed,
+                        Manager.Stats.SecondsPlayed);
+
+                var updatedTotalDuration = totalDuration.Add(gameDuration);
+
+                Manager.Stats.HoursPlayed = updatedTotalDuration.Hours;
+                Manager.Stats.MinutesPlayed = updatedTotalDuration.Minutes;
+                Manager.Stats.SecondsPlayed = updatedTotalDuration.Seconds;
+
                 throw new InvalidColorSelectionException();
             }
 

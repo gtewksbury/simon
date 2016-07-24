@@ -22,7 +22,7 @@ namespace Tewks.Simon.Domain
         /// <summary>
         // Gets or sets the current game's statistics
         /// </summary>
-        public DeviceStats Stats { get; set; }
+        public DeviceStats Stats { get; set; } = new DeviceStats();
 
 
         /// <summary>
@@ -40,24 +40,33 @@ namespace Tewks.Simon.Domain
             set { _Ready = value; }
         }
 
+        public async Task Run(IDevice device)
+        {
+            Device = device;
+            Stats = await DeviceStatsRepository.GetStats();
+
+            while (true)
+            {
+                await Statistics.Create(this).Publish();
+                await Task.Delay(2000);
+            }
+        }
+
         /// <summary>
         /// Starts a new game on the given device.
         /// </summary>
         /// <param name="device">The device on which the game is played.</param>
         /// <returns></returns>
-        public async Task StartGame(IDevice device)
+        public async Task StartGame()
         {
             await Task.Run(() =>
             {
-                Device = device;
                 CurrentGame = new Game();
                 CurrentGame.Start(this);
             });
 
             // increment the number of games played on the device
             Stats.GamesPlayed++;
-
-            // publish the stats
         }
 
         /// <summary>
@@ -74,6 +83,23 @@ namespace Tewks.Simon.Domain
                 return;
             }
 
+            if (color == ButtonColor.Green)
+            {
+                Stats.GreenClickCount++;
+            }
+            else if (color == ButtonColor.Red)
+            {
+                Stats.RedClickCount++;
+            }
+            else if (color == ButtonColor.White)
+            {
+                Stats.WhiteClickCount++;
+            }
+            else if (color == ButtonColor.Yellow)
+            {
+                Stats.YellowClickCount++;
+            }
+
             await Task.Run(() =>
             {
                 try
@@ -81,6 +107,7 @@ namespace Tewks.Simon.Domain
                     // check if the selected color was correct
                     if (!CurrentGame.SelectColor(color))
                     {
+                        Ready = false;
                         // if they selected the correct color
                         // and it was the last color for the current round,
                         // start a new round
@@ -88,15 +115,16 @@ namespace Tewks.Simon.Domain
                     }
 
                     CurrentGame.Stats.TotalCorrect++;
+
+                    return;
                 }
                 catch (InvalidColorSelectionException ex)
                 {
+                    DeviceStatsRepository.Save(Stats).ConfigureAwait(false);
                     Ready = false;
                     Device.GameOver(ex.CorrectColor);
                 }
             });
-
-            // publish statistics
         }
     }
 }

@@ -91,10 +91,10 @@ namespace Tewks.Simon
 
             foreach (var color in colors)
             {
-                //if (Manager.CurrentGame.GameOver)
-                //{
-                //    return;
-                //}
+                if (Manager.CurrentGame.GameOver)
+                {
+                    return;
+                }
 
                 if (color == ButtonColor.Green)
                 {
@@ -123,7 +123,6 @@ namespace Tewks.Simon
         /// <param name="e"></param>
         private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-
             // testing
 
             //var blob = container.GetBlockBlobReference("stats2.json");
@@ -137,7 +136,7 @@ namespace Tewks.Simon
             //{
 
             //}
-            
+
 
             // create a serial connection to the arduino board
             _Serial = new UsbSerial(await FindFirstArduinoBoard());
@@ -173,6 +172,8 @@ namespace Tewks.Simon
                 _Arduino.digitalWrite(WHITE_LED, PinState.LOW);
                 _Arduino.digitalWrite(GREEN_LED, PinState.LOW);
                 _Arduino.digitalWrite(YELLOW_LED, PinState.LOW);
+
+                Manager.Run(this);
 
                 // show as ready
                 await FlashAllColorButton();
@@ -234,7 +235,16 @@ namespace Tewks.Simon
             if (pin == GAME_BTN && state == PinState.LOW)
             {
                 Debug.WriteLine("New Game Clicked");
-                await Manager.StartGame(this);
+                await Manager.StartGame();
+            }
+
+            if (state == PinState.HIGH)
+            {
+                _Arduino.digitalWrite(GREEN_LED, PinState.LOW);
+                _Arduino.digitalWrite(WHITE_LED, PinState.LOW);
+                _Arduino.digitalWrite(YELLOW_LED, PinState.LOW);
+                _Arduino.digitalWrite(RED_LED, PinState.LOW);
+                _LastUp = DateTime.Now;
             }
 
             // don't allow the player to click buttons if the
