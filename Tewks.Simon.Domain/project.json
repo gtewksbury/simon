@@ -1,7 +1,17 @@
 ﻿{
   "dependencies": {
     "Autofac": "3.5.2",
-    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0"
+    "Microsoft.Azure.Amqp": "1.1.5",
+    "Microsoft.Azure.Devices.Client": "1.0.11",
+    "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
+    "Newtonsoft.Json": "8.0.3",
+    "PCLCrypto": "2.0.147",
+    "PInvoke.BCrypt": "0.3.2",
+    "PInvoke.Kernel32": "0.3.2",
+    "PInvoke.NCrypt": "0.3.2",
+    "PInvoke.Windows.Core": "0.3.2",
+    "Validation": "2.2.8",
+    "WindowsAzure.Storage": "7.1.2"
   },
   "frameworks": {
     "uap10.0": {}
